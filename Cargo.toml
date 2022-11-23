@@ -1,0 +1,41 @@
+[package]
+name = "audio-bicycle"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+log = "0.4.17"
+env_logger = "0.9.3"
+thiserror = "1.0.37"
+
+async-trait = "0.1.58"
+futures = "0.3.25"
+
+once_cell = "1.16.0"
+
+toml = "0.5.9"
+
+directories = "4.0.1"
+
+libpulse-binding = "2.26.0"
+libpulse-simple-binding = "2.25.0"
+
+binrw = "0.10.0"
+
+arrayvec = "0.7.2"
+
+[dependencies.clap]
+version = "4.0.26"
+features = ["derive"]
+
+[dependencies.serde]
+version = "1.0.147"
+features = ["derive"]
+
+[dependencies.tokio]
+version = "1.21.2"
+features = ["rt-multi-thread", "macros", "sync", "io-std", "io-util", "net"]
+
+[dependencies.tokio-util]
+version = "0.7.4"
+features = ["compat", "io", "io-util"]
