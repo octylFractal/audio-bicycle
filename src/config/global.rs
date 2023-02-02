@@ -2,6 +2,7 @@ use std::net::SocketAddr;
 use directories::ProjectDirs;
 use serde::Deserialize;
 use thiserror::Error;
+use crate::asciistackstr::AsciiStackString;
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
@@ -27,7 +28,7 @@ pub fn load_config() -> Result<GlobalConfig, ConfigError> {
 pub struct GlobalConfig {
     pub local_address: SocketAddr,
     pub dest_address: SocketAddr,
-    pub stream_name: String,
+    pub stream_name: AsciiStackString<16>,
     pub transmitter: Transmitter,
     pub receiver: Receiver,
 }

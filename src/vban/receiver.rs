@@ -5,6 +5,7 @@ use std::sync::Arc;
 use binrw::BinReaderExt;
 use thiserror::Error;
 use tokio::net::UdpSocket;
+use crate::asciistackstr::AsciiStackString;
 
 use crate::vban::packet::{DataType, VbanPacket,Codec,SampleRate};
 
@@ -12,14 +13,14 @@ use crate::vban::packet::{DataType, VbanPacket,Codec,SampleRate};
 pub enum ReceiverError {
     #[error("Socket read error: {0}")]
     SocketRead(#[from] std::io::Error),
-    #[error("PipeWire channel could not receive")]
-    PipeWireChannelBroken,
+    #[error("Audio channel could not receive")]
+    AudioChannelBroken,
 }
 
 pub struct Receiver {
-    pub stream_name: String,
+    pub stream_name: AsciiStackString<16>,
     pub recv_address: IpAddr,
-    pub pw_out: tokio::sync::mpsc::Sender<Vec<u8>>,
+    pub audio_out: tokio::sync::mpsc::Sender<Vec<u8>>,
     pub socket: Arc<UdpSocket>,
 }
 
@@ -42,14 +43,14 @@ impl Receiver {
                     continue;
                 }
             };
-            if decoded.header.stream_name.as_str() != self.stream_name {
+            if decoded.header.stream_name != self.stream_name {
                 continue;
             }
             assert!(matches!(decoded.header.data_type, DataType::I24));
             assert!(matches!(decoded.header.codec, Codec::PCM));
             assert!(matches!(decoded.header.sample_rate, SampleRate::Hz48000));
             assert!(matches!(decoded.header.channels, 1)); // Meaning 2... :)
-            self.pw_out.send(decoded.data).await.map_err(|_| ReceiverError::PipeWireChannelBroken)?;
+            self.audio_out.send(decoded.data).await.map_err(|_| ReceiverError::AudioChannelBroken)?;
         }
     }
 }
