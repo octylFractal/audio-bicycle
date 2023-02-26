@@ -29,14 +29,4 @@ pub struct GlobalConfig {
     pub local_address: SocketAddr,
     pub dest_address: SocketAddr,
     pub stream_name: AsciiStackString<16>,
-    pub transmitter: Transmitter,
-    pub receiver: Receiver,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct Transmitter {
-}
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct Receiver {
 }
