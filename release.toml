@@ -1,0 +1,4 @@
+sign-commit = true
+sign-tag = true
+pre-release-commit-message = "Bump version to {{version}}"
+tag-message = "Release version {{version}}"
