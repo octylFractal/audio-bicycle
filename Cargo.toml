@@ -7,7 +7,7 @@ authors = ["Octavia Togami <octavia.togami@gmail.com>"]
 readme = "README.md"
 license = "AGPL-3.0-or-later"
 repository = "https://github.com/octylFractal/audio-bicycle"
-version = "0.1.0"
+version = "0.1.1-dev"
 edition = "2021"
 
 [dependencies]
