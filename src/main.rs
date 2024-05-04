@@ -1,22 +1,25 @@
 use std::process::ExitCode;
 use std::process::Termination;
 use std::sync::Arc;
+use std::time::Instant;
 
 use clap::Parser;
-use futures::{FutureExt, select};
+use futures::{select, FutureExt};
 use libpulse_binding::error::PAErr;
 use log::LevelFilter;
 use thiserror::Error;
 use tokio::net::UdpSocket;
 
-use crate::config::global::{ConfigError, load_config};
+use crate::backoff::BackOff;
+use crate::config::global::{load_config, ConfigError};
 use crate::vban::receiver::ReceiverError;
 use crate::vban::transmitter::TransmitterError;
 
 mod asciistackstr;
+mod audio_engine;
+mod backoff;
 mod config;
 mod vban;
-mod audio_engine;
 
 /// Service designed to run on systemd to connect to a VBAN stream pair for mic and sound output.
 #[derive(Parser)]
@@ -57,12 +60,16 @@ async fn main() -> ExitCode {
         })
         .init();
 
+    let mut backoff = BackOff::default();
     loop {
         match main_for_result().await {
-            Ok(_) => { break ExitCode::SUCCESS; }
+            Ok(_) => {
+                break ExitCode::SUCCESS;
+            }
             Err(e) => {
                 if is_restartable_error(&e) {
                     log::warn!("Restarting service due to error: {:#}", e);
+                    backoff.back_off().await;
                 } else {
                     log::error!("Exiting service due to error: {:#}", e);
                     break e.report();
