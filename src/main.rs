@@ -57,16 +57,33 @@ async fn main() -> ExitCode {
         })
         .init();
 
-    match main_for_result(args).await {
-        Ok(_) => ExitCode::SUCCESS,
-        Err(e) => {
-            log::error!("{:#}", e);
-            e.report()
+    loop {
+        match main_for_result().await {
+            Ok(_) => { break ExitCode::SUCCESS; }
+            Err(e) => {
+                if is_restartable_error(&e) {
+                    log::warn!("Restarting service due to error: {:#}", e);
+                } else {
+                    log::error!("Exiting service due to error: {:#}", e);
+                    break e.report();
+                }
+            }
         }
     }
 }
 
-async fn main_for_result(_: AudioBicycle) -> Result<(), AudioBicycleError> {
+/// Is this error one that can be potentially handled by simply restarting the loop?
+fn is_restartable_error(err: &AudioBicycleError) -> bool {
+    match err {
+        AudioBicycleError::Receiver(ReceiverError::SocketRead(_)) => true,
+        AudioBicycleError::Receiver(ReceiverError::AudioChannelBroken) => true,
+        AudioBicycleError::Transmitter(TransmitterError::SocketWrite(_)) => true,
+        AudioBicycleError::PulseAudio(_) => true,
+        _ => false,
+    }
+}
+
+async fn main_for_result() -> Result<(), AudioBicycleError> {
     let config = load_config()?;
 
     let socket = UdpSocket::bind(config.local_address).await?;
