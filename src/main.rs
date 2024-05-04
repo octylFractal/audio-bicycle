@@ -1,7 +1,6 @@
 use std::process::ExitCode;
 use std::process::Termination;
 use std::sync::Arc;
-use std::time::Instant;
 
 use clap::Parser;
 use futures::{select, FutureExt};
@@ -81,13 +80,13 @@ async fn main() -> ExitCode {
 
 /// Is this error one that can be potentially handled by simply restarting the loop?
 fn is_restartable_error(err: &AudioBicycleError) -> bool {
-    match err {
-        AudioBicycleError::Receiver(ReceiverError::SocketRead(_)) => true,
-        AudioBicycleError::Receiver(ReceiverError::AudioChannelBroken) => true,
-        AudioBicycleError::Transmitter(TransmitterError::SocketWrite(_)) => true,
-        AudioBicycleError::PulseAudio(_) => true,
-        _ => false,
-    }
+    matches!(
+        err,
+        AudioBicycleError::Receiver(ReceiverError::SocketRead(_))
+            | AudioBicycleError::Receiver(ReceiverError::AudioChannelBroken)
+            | AudioBicycleError::Transmitter(TransmitterError::SocketWrite(_))
+            | AudioBicycleError::PulseAudio(_)
+    )
 }
 
 async fn main_for_result() -> Result<(), AudioBicycleError> {
