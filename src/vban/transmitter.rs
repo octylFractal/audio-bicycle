@@ -22,7 +22,6 @@ pub struct Transmitter {
     pub socket: Arc<UdpSocket>,
 }
 
-
 const SAMPLE_SIZE: u32 = 2 * 3;
 const MAX_DATA_PACKET_SIZE: u32 = 1436;
 
@@ -57,7 +56,8 @@ impl Transmitter {
                 data: audio_packet,
             };
             buf.clear();
-            Cursor::new(&mut buf).write_le(&packet)
+            Cursor::new(&mut buf)
+                .write_le(&packet)
                 .expect("should always be able to write to a Vec");
             let sent = self.socket.send_to(&buf, self.dest_address).await?;
             assert_eq!(sent, buf.len(), "should always send the whole packet");

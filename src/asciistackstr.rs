@@ -13,7 +13,7 @@ pub enum AsciiError {
     CapacityExceeded(#[from] arrayvec::CapacityError),
 }
 
-#[derive( Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct AsciiStackString<const CAP: usize> {
     storage: ArrayVec<u8, CAP>,
@@ -53,12 +53,8 @@ impl<const CAP: usize> TryFrom<String> for AsciiStackString<CAP> {
     fn try_from(value: String) -> Result<Self, Self::Error> {
         let mut storage: ArrayVec<u8, CAP> = value.as_bytes().try_into()?;
         if storage.iter().all(|c| c.is_ascii()) {
-            storage.truncate(
-                storage.iter().position(|v| *v == b'\0').unwrap_or(CAP)
-            );
-            Ok(Self {
-                storage,
-            })
+            storage.truncate(storage.iter().position(|v| *v == b'\0').unwrap_or(CAP));
+            Ok(Self { storage })
         } else {
             Err(AsciiError::NotAscii)
         }
@@ -80,7 +76,11 @@ impl<const CAP: usize> TryFrom<[u8; CAP]> for AsciiStackString<CAP> {
                 storage: ArrayVec::from(value),
             };
             string.storage.truncate(
-                string.storage.iter().position(|v| *v == b'\0').unwrap_or(CAP)
+                string
+                    .storage
+                    .iter()
+                    .position(|v| *v == b'\0')
+                    .unwrap_or(CAP),
             );
             Ok(string)
         } else {
@@ -90,7 +90,7 @@ impl<const CAP: usize> TryFrom<[u8; CAP]> for AsciiStackString<CAP> {
 }
 
 impl<'a, const CAP: usize> From<&'a AsciiStackString<CAP>> for [u8; CAP] {
-    fn from(value: &'a  AsciiStackString<CAP>) -> Self {
+    fn from(value: &'a AsciiStackString<CAP>) -> Self {
         let mut index = 0;
         [(); CAP].map(|_| {
             let byte = value.storage.get(index).copied().unwrap_or(0);

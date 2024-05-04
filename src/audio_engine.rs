@@ -1,12 +1,12 @@
-use futures::select;
+use crate::vban::transmitter::USABLE_DATA_PACKET_SIZE;
 use futures::future::FutureExt;
+use futures::select;
 use libpulse_binding::def::BufferAttr;
 use libpulse_binding::error::PAErr;
 use libpulse_binding::sample::{Format, Spec};
 use libpulse_binding::stream::Direction;
 use libpulse_simple_binding::Simple;
 use once_cell::sync::Lazy;
-use crate::vban::transmitter::USABLE_DATA_PACKET_SIZE;
 
 static SPEC: Lazy<Spec> = Lazy::new(|| {
     let spec = Spec {
@@ -38,7 +38,8 @@ pub async fn run(
             tokio::task::block_in_place(|| s.write(&buffer))?;
         }
         Ok::<_, PAErr>(())
-    }).fuse();
+    })
+    .fuse();
     let mut input_task = tokio::spawn(async move {
         let s = Simple::new(
             None,
@@ -63,14 +64,16 @@ pub async fn run(
             }
         }
         Ok::<_, PAErr>(())
-    }).fuse();
+    })
+    .fuse();
 
     loop {
         (select! {
             output_result = output_task => output_result,
             input_result = input_task => input_result,
             complete => break,
-        }).expect("task panicked")?;
+        })
+        .expect("task panicked")?;
     }
 
     Ok(())

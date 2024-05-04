@@ -2,12 +2,12 @@ use std::io::Cursor;
 use std::net::IpAddr;
 use std::sync::Arc;
 
+use crate::asciistackstr::AsciiStackString;
 use binrw::BinReaderExt;
 use thiserror::Error;
 use tokio::net::UdpSocket;
-use crate::asciistackstr::AsciiStackString;
 
-use crate::vban::packet::{DataType, VbanPacket,Codec,SampleRate};
+use crate::vban::packet::{Codec, DataType, SampleRate, VbanPacket};
 
 #[derive(Debug, Error)]
 pub enum ReceiverError {
@@ -50,7 +50,10 @@ impl Receiver {
             assert!(matches!(decoded.header.codec, Codec::PCM));
             assert!(matches!(decoded.header.sample_rate, SampleRate::Hz48000));
             assert!(matches!(decoded.header.channels, 1)); // Meaning 2... :)
-            self.audio_out.send(decoded.data).await.map_err(|_| ReceiverError::AudioChannelBroken)?;
+            self.audio_out
+                .send(decoded.data)
+                .await
+                .map_err(|_| ReceiverError::AudioChannelBroken)?;
         }
     }
 }

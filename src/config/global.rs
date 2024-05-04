@@ -1,8 +1,8 @@
-use std::net::SocketAddr;
+use crate::asciistackstr::AsciiStackString;
 use directories::ProjectDirs;
 use serde::Deserialize;
+use std::net::SocketAddr;
 use thiserror::Error;
-use crate::asciistackstr::AsciiStackString;
 
 #[derive(Debug, Error)]
 pub enum ConfigError {
