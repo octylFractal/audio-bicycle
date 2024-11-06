@@ -1,5 +1,11 @@
 Audio Bicycle
 =============
+
+# ARCHIVED NOTICE
+This is now archived because I no longer need it. I use PipeWire and [their VBAN modules](https://docs.pipewire.org/page_module_vban_recv.html) instead.
+https://octyl.net/2024/11/05/pipewire-built-in-vban/
+# END ARCHIVED NOTICE
+
 A two-audio communicator that uses [the VBAN protocol](https://vb-audio.com/Voicemeeter/VBANProtocol_Specifications.pdf) to pass audio to another computer.
 
 ## Usage
